@@ -1,0 +1,101 @@
+﻿function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+function enquiryFormSuccess(data) {
+    if (data.result) {
+        $('#EnquiryFormId #Result').removeClass('alert-danger');
+        $('#EnquiryFormId #Result').addClass('alert-success');
+        $('#EnquiryFormId #Result strong').text('Thanks! ');
+        $('#EnquiryFormId #Result span').text(data.message);
+        $('#EnquiryFormId #Result').show();
+        setTimeout(function () {
+            $('#EnquiryFormId #Result').hide();
+        }, 2500);
+    } else {
+        $('#EnquiryFormId #Result').removeClass('alert-success');
+        $('#EnquiryFormId #Result').addClass('alert-danger');
+        $('#EnquiryFormId #Result span').text('');
+        $('#EnquiryFormId #Result strong').text(data.message);
+        $('#EnquiryFormId #Result').show();
+        setTimeout(function () {
+            $('#EnquiryFormId #Result').hide();
+        }, 2500);
+    }
+}
+function onFailure() {
+    $('#EnquiryFormId #Result').removeClass('alert-success');
+    $('#EnquiryFormId #Result').addClass('alert-danger');
+    $('#EnquiryFormId #Result span').text('');
+    $('#EnquiryFormId #Result strong').text('Something went wrong, please try again.');
+    $('#EnquiryFormId #Result').show();
+    setTimeout(function () {
+        $('#EnquiryFormId #Result').hide();
+    }, 2500);
+}
+
+$('#customersCarousel').carousel({
+    interval: 3500
+});
+
+$('.carousel .carousel-item').each(function () {
+    var next = $(this).next();
+    if (!next.length) {
+        next = $(this).siblings(':first');
+    }
+    next.children(':first-child').clone().appendTo($(this));
+
+    for (var i = 0; i < 2; i++) {
+        next = next.next();
+        if (!next.length) {
+            next = $(this).siblings(':first');
+        }
+
+        next.children(':first-child').clone().appendTo($(this));
+    }
+});
+$(document).ready(function () {
+    if (getCookie("cookiespolicy") !== "accepted")
+        $("#Cookies-popup").show();
+    $("#agreeBtn").click(function () {
+        setCookie("cookiespolicy", "accepted", 365);
+        $("#Cookies-popup").hide();
+    });
+    //Initialize Bootstrap functionality
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="popover"]').popover();
+
+    $('#EnquiryModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var enqtype = button.data('enq-type'); // Extract info from data-* attributes
+        var enqTypeVal = button.data('enq-type-val');
+        var modal = $(this);
+        modal.find('.modal-title').text(enqtype);
+        modal.find('.modal-body #EnquiryType').val(enqTypeVal);
+        $('#EnquiryFormId #Result').hide();
+    });
+    $('#EnquiryModal').on('hidden.bs.modal', function (e) {
+        $('#EnquiryFormId')[0].reset();
+        $('#EnquiryFormId .field-validation-valid').html('');
+        $('#EnquiryFormId #Result strong').text('');
+        $('#EnquiryFormId #Result span').text('');
+        $('#EnquiryFormId #Result').hide();
+    });
+});
